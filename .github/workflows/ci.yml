@@ -25,4 +25,12 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with: {gradle-version: "8.13"}
       - working-directory: android
-        run: gradle assembleDebug --stacktrace
+        run: gradle assembleDebug assembleRelease lintDebug --stacktrace
+      - name: Upload Android build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: focusforge-android-builds
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
