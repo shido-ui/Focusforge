@@ -49,7 +49,19 @@ class FocusSessionRepository @Inject constructor(
             updatedAtEpochMs = nowWall,
             revision = current.revision + 1,
         )
-        dao.upsert(next)
+        val updated = dao.updateIfRevisionMatches(
+            id = next.id,
+            expectedRevision = current.revision,
+            newRevision = next.revision,
+            state = next.state,
+            startedAtEpochMs = next.startedAtEpochMs,
+            endsAtEpochMs = next.endsAtEpochMs,
+            startElapsedRealtimeMs = next.startElapsedRealtimeMs,
+            lastElapsedRealtimeMs = next.lastElapsedRealtimeMs,
+            elapsedDurationMs = next.elapsedDurationMs,
+            updatedAtEpochMs = next.updatedAtEpochMs,
+        )
+        check(updated == 1) { "Focus session changed concurrently; reload before retrying." }
         next
     }
 
