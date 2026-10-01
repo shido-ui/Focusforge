@@ -12,11 +12,11 @@ class SignupRequest(BaseModel):
 
     @field_validator("email")
     @classmethod
-    def normalize_email(cls, value: EmailStr) -> EmailStr:
+    def normalize_email(cls, value: EmailStr) -> str:
         text = str(value)
         if text != text.strip():
             raise ValueError("Email must not contain leading or trailing whitespace.")
-        return EmailStr(text.lower())
+        return text.lower()
 
     @field_validator("date_of_birth")
     @classmethod
