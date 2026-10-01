@@ -38,3 +38,13 @@ Open `android/` in Android Studio with JDK 17. The API endpoint is supplied thro
 3. Test Android behavior on real hardware.
 4. Keep secrets server-side.
 5. Update the spec/roadmap when approved requirements change.
+
+
+## CI release prerequisites
+
+The Android release build is intentionally fail-closed. Configure these GitHub repository settings before expecting the Android CI job to become green:
+
+- Repository variable: `FOCUSFORGE_RELEASE_API_BASE_URL` — HTTPS production API base URL.
+- Repository secrets: `FOCUSFORGE_RELEASE_KEYSTORE_B64`, `FOCUSFORGE_RELEASE_STORE_PASSWORD`, `FOCUSFORGE_RELEASE_KEY_ALIAS`, `FOCUSFORGE_RELEASE_KEY_PASSWORD`.
+
+The release keystore is never committed to the repository. Debug builds use the controlled development endpoint `http://10.0.2.2:8080` unless `-PfocusforgeApiBaseUrlDebug=...` is supplied. Local-device HTTP endpoints are permitted only by the debug build's network-security policy; release builds require HTTPS.
