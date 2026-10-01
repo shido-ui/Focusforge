@@ -65,7 +65,7 @@ android {
 }
 
 ksp {
-    arg("room.schemaLocation", "\${project.projectDir}/schemas")
+    arg("room.schemaLocation", "${project.projectDir}/schemas")
     arg("room.generateKotlin", "true")
 }
 
