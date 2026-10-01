@@ -49,8 +49,13 @@ class Settings(BaseSettings):
         if self.environment == "production":
             if len(self.jwt_secret) < 32:
                 raise ValueError("FOCUSFORGE_JWT_SECRET must be at least 32 characters in production.")
-            if not self.cors_origins:
+            origins = self.allowed_origins
+            if not origins:
                 raise ValueError("FOCUSFORGE_CORS_ORIGINS is required in production.")
+            if any(not origin.startswith("https://") for origin in origins):
+                raise ValueError("Production CORS origins must use HTTPS.")
+            if any(origin == "*" for origin in origins):
+                raise ValueError("Wildcard CORS is forbidden in production.")
             if not self.production_api_base_url.startswith("https://"):
                 raise ValueError("FOCUSFORGE_PRODUCTION_API_BASE_URL must use HTTPS in production.")
         return self
