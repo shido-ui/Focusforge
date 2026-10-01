@@ -62,17 +62,17 @@ class FocusForgeApi(
             .post(body.toString().toRequestBody(jsonMediaType))
             .build()
         execute(request).use { response ->
-        val payload = response.body?.string().orEmpty()
-        if (response.code !in 200..299) {
-            val message = runCatching { JSONObject(payload).optString("detail") }.getOrNull()
+            val payload = response.body?.string().orEmpty()
+            if (response.code !in 200..299) {
+                val message = runCatching { JSONObject(payload).optString("detail") }.getOrNull()
                 ?.ifBlank { null } ?: "Request failed."
-            throw ApiException(response.code, message)
-        }
-        val json = JSONObject(payload)
-        return AuthSession(
-            accessToken = json.getString("access_token"),
-            tokenType = json.optString("token_type", "bearer"),
-        )
+                throw ApiException(response.code, message)
+            }
+            val json = JSONObject(payload)
+            return AuthSession(
+                accessToken = json.getString("access_token"),
+                tokenType = json.optString("token_type", "bearer"),
+            )
         }
     }
 
