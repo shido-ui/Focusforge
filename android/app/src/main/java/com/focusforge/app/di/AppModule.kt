@@ -6,13 +6,15 @@ import androidx.work.WorkManager
 import com.focusforge.app.data.FocusForgeDatabase
 import com.focusforge.app.data.PreferencesStore
 import com.focusforge.app.network.FocusForgeApi
+import com.focusforge.app.security.SecureTokenStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -20,7 +22,10 @@ object AppModule {
     @Provides
     @Singleton
     fun database(@ApplicationContext context: Context): FocusForgeDatabase =
-        Room.databaseBuilder(context, FocusForgeDatabase::class.java, "focusforge.db").build()
+        Room.databaseBuilder(context, FocusForgeDatabase::class.java, "focusforge.db")
+            .addMigrations(FocusForgeDatabase.MIGRATION_1_2)
+            .fallbackToDestructiveMigrationOnDowngrade()
+            .build()
 
     @Provides
     @Singleton
@@ -28,11 +33,22 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun secureTokenStore(@ApplicationContext context: Context) = SecureTokenStore(context)
+
+    @Provides
+    @Singleton
     fun workManager(@ApplicationContext context: Context) = WorkManager.getInstance(context)
 
     @Provides
     @Singleton
-    fun httpClient(): OkHttpClient = OkHttpClient.Builder().build()
+    fun httpClient(): OkHttpClient =
+        OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .writeTimeout(20, TimeUnit.SECONDS)
+            .callTimeout(30, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(false)
+            .build()
 
     @Provides
     @Singleton
