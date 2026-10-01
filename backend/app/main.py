@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .db import get_db
 from .models import User
 from .schemas import LoginRequest,SignupRequest,TokenResponse
-from .security import create_access_token,hash_password,is_18_or_older,verify_password
+from .security import create_access_token,get_current_user_id,hash_password,is_18_or_older,verify_password
 app=FastAPI(title="FocusForge API",version="0.1.0")
 @app.get("/api/v1/health")
 def health(): return {"status":"ok","service":"focusforge-api"}
@@ -21,3 +21,9 @@ def login(p:LoginRequest,db:Session=Depends(get_db)):
  u=db.scalar(select(User).where(User.email==p.email.lower()))
  if not u or not verify_password(p.password,u.password_hash): raise HTTPException(401,"Invalid credentials.")
  return TokenResponse(access_token=create_access_token(u.id))
+@app.delete("/api/v1/auth/account",status_code=status.HTTP_204_NO_CONTENT)
+def delete_account(user_id:str=Depends(get_current_user_id),db:Session=Depends(get_db)):
+ user=db.get(User,user_id)
+ if user is None: raise HTTPException(status_code=404,detail="Account not found.")
+ db.delete(user); db.commit()
+ return None
