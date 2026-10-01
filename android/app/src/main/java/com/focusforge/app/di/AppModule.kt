@@ -24,7 +24,6 @@ object AppModule {
     fun database(@ApplicationContext context: Context): FocusForgeDatabase =
         Room.databaseBuilder(context, FocusForgeDatabase::class.java, "focusforge.db")
             .addMigrations(FocusForgeDatabase.MIGRATION_1_2)
-            .fallbackToDestructiveMigrationOnDowngrade()
             .build()
 
     @Provides
