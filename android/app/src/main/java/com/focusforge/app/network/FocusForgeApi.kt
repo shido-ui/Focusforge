@@ -72,7 +72,6 @@ class FocusForgeApi(
                 .url("$baseUrl/api/v1/auth/account")
                 .delete()
                 .header("Authorization", "Bearer $accessToken")
-                .header("Idempotency-Key", eventJson.optString("client_event_id"))
                 .build()
         ).use { response ->
             if (response.code != 204) throw parseApiException(response)
@@ -98,6 +97,7 @@ class FocusForgeApi(
                 .url("$baseUrl/api/v1/sync/events")
                 .post(eventJson.toString().toRequestBody(jsonMediaType))
                 .header("Authorization", "Bearer $accessToken")
+                .header("Idempotency-Key", eventJson.optString("client_event_id"))
                 .build()
         ).use { response ->
             if (response.code !in 200..299) throw parseApiException(response)
