@@ -30,7 +30,7 @@ uvicorn app.main:app --reload
 Set `FOCUSFORGE_JWT_SECRET` to a long random development secret. Never commit secrets or user data.
 
 ## Android
-Open `android/` in Android Studio with JDK 17. P0 kiosk assumptions remain unvalidated until real-device testing.
+Open `android/` in Android Studio with JDK 17. The API endpoint is supplied through the Gradle property `focusforgeApiBaseUrl` (for example, `-PfocusforgeApiBaseUrl=https://your-tunnel.example`). The default placeholder intentionally does not point at a real service. P0 kiosk assumptions remain unvalidated until real-device testing.
 
 ## Rules
 1. Follow `docs/ROADMAP.md` phase boundaries.
