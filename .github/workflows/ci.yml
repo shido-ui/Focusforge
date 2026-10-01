@@ -27,7 +27,7 @@ jobs:
       - run: python -m pip install --upgrade pip && pip install -e ".[test]"
       - run: alembic upgrade head
         env:
-          FOCUSFORGE_JWT_SECRET: ci-test-secret
+          FOCUSFORGE_JWT_SECRET: ci-test-secret-0123456789-0123456789
       - run: pytest -q
         env:
           FOCUSFORGE_JWT_SECRET: ci-test-secret
