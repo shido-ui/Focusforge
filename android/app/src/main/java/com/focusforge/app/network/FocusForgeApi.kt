@@ -12,8 +12,9 @@ import java.time.Instant
 class FocusForgeApi(
     baseUrl: String,
     private val client: OkHttpClient,
+    requiresHttps: Boolean,
 ) {
-    private val baseUrl = requireValidBaseUrl(baseUrl)
+    private val baseUrl = requireValidBaseUrl(baseUrl, requiresHttps)
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
     suspend fun health(): Boolean = withContext(Dispatchers.IO) {
@@ -157,16 +158,15 @@ class FocusForgeApi(
         }
 
     companion object {
-        fun requireValidBaseUrl(value: String): String {
+        fun requireValidBaseUrl(value: String, requiresHttps: Boolean): String {
             val normalized = value.trim().trimEnd('/')
             require(normalized.isNotBlank()) { "API base URL must not be blank." }
             require(!normalized.contains("localhost.invalid")) { "Placeholder API endpoint is forbidden." }
-            val https = normalized.startsWith("https://")
-            val developmentHttp = normalized.startsWith("http://10.0.2.2:") ||
-                normalized.startsWith("http://127.0.0.1:") ||
-                normalized.startsWith("http://localhost:")
-            require(https || developmentHttp) {
-                "Production API endpoints must use HTTPS; HTTP is limited to controlled local development."
+            require(normalized.startsWith("https://") || normalized.startsWith("http://")) {
+                "API base URL must use http:// or https://."
+            }
+            if (requiresHttps) {
+                require(normalized.startsWith("https://")) { "Production API endpoints must use HTTPS." }
             }
             return normalized
         }
