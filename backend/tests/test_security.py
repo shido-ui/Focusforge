@@ -1,6 +1,18 @@
 from datetime import date
 
-from app.security import create_access_token, get_current_user_id, is_18_or_older, verify_password
+import pytest
+import jwt
+from fastapi import HTTPException
+from pydantic import ValidationError
+
+from app.config import Settings
+from app.security import (
+    create_access_token,
+    get_current_user_id,
+    hash_password,
+    is_18_or_older,
+    verify_password,
+)
 
 
 def test_adult_boundary():
@@ -9,7 +21,6 @@ def test_adult_boundary():
 
 
 def test_password_hash_round_trip():
-    from app.security import hash_password
     password = "a-strong-password-123"
     hashed = hash_password(password)
     assert hashed != password
@@ -19,17 +30,24 @@ def test_password_hash_round_trip():
 
 def test_access_token_contains_expected_subject():
     token = create_access_token("user-123")
-    import jwt
-    from app.security import get_settings
-    payload = jwt.decode(token, get_settings().jwt_secret, algorithms=["HS256"])
+    payload = jwt.decode(token, __import__("app.config", fromlist=["get_settings"]).get_settings().jwt_secret, algorithms=["HS256"])
     assert payload["sub"] == "user-123"
     assert "exp" in payload
 
 
 def test_missing_authentication_is_rejected():
-    from fastapi import HTTPException
-    try:
+    with pytest.raises(HTTPException) as exc:
         get_current_user_id(None)
-        assert False
-    except HTTPException as exc:
-        assert exc.status_code == 401
+    assert exc.value.status_code == 401
+
+
+def test_production_rejects_short_jwt_secret():
+    with pytest.raises(ValidationError):
+        Settings(environment="production", jwt_secret="too-short")
+
+
+def test_access_token_window_is_bounded():
+    with pytest.raises(ValidationError):
+        Settings(jwt_secret="test-secret", access_token_minutes=4)
+    with pytest.raises(ValidationError):
+        Settings(jwt_secret="test-secret", access_token_minutes=61)
