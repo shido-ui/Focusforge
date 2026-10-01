@@ -8,6 +8,17 @@ Disposable risk-validation harness; not the production app.
 - Test startup/recovery after process death and reboot.
 - Identify Android/OEM limitations before P1.
 
+## Target hardware
+The supplied device screenshot establishes:
+- Device: **OPPO K13 Turbo Pro 5G**
+- OEM: **OPPO**
+- ColorOS: **16.0.9**
+- SoC: Snapdragon 8s Gen 4
+- RAM: 12 GB
+- Storage: 256 GB
+
+**Android version is not established by the screenshot and remains TODO.** ColorOS version must not be treated as the Android version.
+
 ## Important safety boundary
 A successful build does NOT mean P0-A passes. P0-A requires real-device evidence.
 Device Owner provisioning can require a fresh/unprovisioned device and may wipe device data. Back up important data first.
@@ -28,9 +39,10 @@ Exact provisioning requirements vary by Android release and device state. Do not
 ## Hardware test record
 | Field | Result |
 |---|---|
-| Device model | TODO |
-| OEM | TODO |
-| Android version | TODO |
+| Device model | **OPPO K13 Turbo Pro 5G** |
+| OEM | **OPPO** |
+| ColorOS | **16.0.9** |
+| Android version | TODO — not visible in supplied screenshot |
 | Build/security patch | TODO |
 | Provisioning method | TODO |
 | Device Owner | TODO |
