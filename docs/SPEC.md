@@ -545,3 +545,20 @@ Reliable real-PDF → structured-learning conversion
 ```
 
 **Immediate action: P1 Foundation.** P0-A hardware validation remains deferred until the completed APK is available; P0-B benchmark validation remains a release gate.
+
+
+## Hardening Addendum — 2026-10-01
+
+The foundation now treats authentication and synchronization as persistent, server-authoritative infrastructure rather than in-memory state.
+
+- Android authentication uses a short-lived access token plus rotating refresh token.
+- Refresh credentials are encrypted at rest with Android Keystore-backed AES-GCM and are never stored as ordinary DataStore values.
+- Backend refresh sessions store only a SHA-256 token hash and support rotation/revocation.
+- Protected routes resolve the JWT subject to an existing User record.
+- Sync events have client-generated IDs and server-side uniqueness/idempotency handling.
+- Android Room now persists a durable outbox and versioned FocusSession state.
+- FocusSession mutations use an explicit state machine and optimistic revision checks.
+- Release Android builds fail closed without an HTTPS API endpoint and release signing inputs.
+- Production backend configuration fails closed for unsafe JWT/CORS/API settings.
+- SQLite is explicitly configured for WAL, foreign keys, busy timeout, and deliberate synchronous mode.
+- P0 kiosk proof remains a separate test harness and does not imply production Device Owner enforcement.
