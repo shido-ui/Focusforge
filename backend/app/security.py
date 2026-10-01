@@ -106,6 +106,10 @@ def get_current_user_id(user: User = Depends(get_current_user)) -> str:
     return user.id
 
 
+def as_utc(value: datetime) -> datetime:
+    return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
+
+
 def rotate_refresh_token(
     db: Session,
     raw_token: str,
@@ -117,7 +121,7 @@ def rotate_refresh_token(
 
     if session is None or session.revoked_at is not None:
         raise HTTPException(401, "Invalid or expired session.")
-    if session.expires_at <= now:
+    if as_utc(session.expires_at) <= now:
         session.revoked_at = now
         db.commit()
         raise HTTPException(401, "Invalid or expired session.")
