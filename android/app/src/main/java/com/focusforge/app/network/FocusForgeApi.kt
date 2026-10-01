@@ -119,7 +119,7 @@ class FocusForgeApi(
             val refresh = json.optString("refresh_token").takeIf { it.isNotBlank() }
                 ?: throw malformedResponse(response.code)
             val expiry = json.optString("access_token_expires_at").takeIf { it.isNotBlank() }
-                ?.let { Instant.parse(it).toEpochMilli() }
+                ?.let { value -> runCatching { Instant.parse(value).toEpochMilli() }.getOrNull() }
                 ?: throw malformedResponse(response.code)
             return AuthSession(
                 accessToken = access,
