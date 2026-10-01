@@ -25,14 +25,19 @@ android {
     signingConfigs {
         create("release") {
             val storeFilePath = System.getenv("FOCUSFORGE_RELEASE_KEYSTORE")
-                ?: throw GradleException("FOCUSFORGE_RELEASE_KEYSTORE is required for release signing.")
-            storeFile = file(storeFilePath)
-            storePassword = System.getenv("FOCUSFORGE_RELEASE_STORE_PASSWORD")
-                ?: throw GradleException("FOCUSFORGE_RELEASE_STORE_PASSWORD is required for release signing.")
-            keyAlias = System.getenv("FOCUSFORGE_RELEASE_KEY_ALIAS")
-                ?: throw GradleException("FOCUSFORGE_RELEASE_KEY_ALIAS is required for release signing.")
-            keyPassword = System.getenv("FOCUSFORGE_RELEASE_KEY_PASSWORD")
-                ?: throw GradleException("FOCUSFORGE_RELEASE_KEY_PASSWORD is required for release signing.")
+            val storePasswordValue = System.getenv("FOCUSFORGE_RELEASE_STORE_PASSWORD")
+            val keyAliasValue = System.getenv("FOCUSFORGE_RELEASE_KEY_ALIAS")
+            val keyPasswordValue = System.getenv("FOCUSFORGE_RELEASE_KEY_PASSWORD")
+            if (!storeFilePath.isNullOrBlank() &&
+                !storePasswordValue.isNullOrBlank() &&
+                !keyAliasValue.isNullOrBlank() &&
+                !keyPasswordValue.isNullOrBlank()
+            ) {
+                storeFile = file(storeFilePath)
+                storePassword = storePasswordValue
+                keyAlias = keyAliasValue
+                keyPassword = keyPasswordValue
+            }
         }
     }
 
