@@ -45,7 +45,9 @@ Build only:
 
 Defer advanced adaptive practice, full Hard Mode, knowledge graph, AI Study Copilot and advanced anti-cheat.
 
-## 3. P0 gate — mandatory before broader development
+## 3. P0 gate — mandatory for release acceptance
+
+> **Project-control decision (2026-10-01):** P0 hardware validation is deferred until a completed APK is available for installation on the target device. P0 remains open and release-blocking; this is an explicit sequencing exception, not a P0 pass.
 
 Nothing else is worth building until both real-hardware risks are proven.
 
@@ -542,4 +544,4 @@ Reliable supported focus state
 Reliable real-PDF → structured-learning conversion
 ```
 
-**Immediate action: P0 only.**
+**Immediate action: P1 Foundation.** P0-A hardware validation remains deferred until the completed APK is available; P0-B benchmark validation remains a release gate.
