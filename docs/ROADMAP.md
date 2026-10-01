@@ -21,7 +21,7 @@
 9. Keep the product scope aligned with `docs/SPEC.md`.
 10. If a new requirement conflicts with this roadmap, update the roadmap/spec explicitly before changing implementation.
 11. When continuing work in a later conversation, read this file and `docs/SPEC.md` before making implementation decisions.
-12. **P0 blocks all broader development until its exit criteria pass.**
+12. **P0 normally blocks broader development; explicit project-control decisions may defer hardware validation while keeping P0 open and release-blocking.**
 
 ---
 
@@ -122,9 +122,15 @@ These are later phases.
 
 # 3. Current Status
 
-## Current phase: P0 — Risk Validation
+## Current phase: P1 — Foundation
 
 **Status:** ACTIVE
+
+### P0 validation debt
+
+P0-A physical-device validation is explicitly deferred until a completed APK is available for installation/testing on the target OPPO K13 Turbo Pro 5G. P0-A is **not passed**.
+
+P0-B benchmark evidence is also still required before release acceptance. P0 remains open as a release gate; moving to P1 is a documented project-control exception so implementation can proceed to a testable APK.
 
 **GitHub tracking issue:** #1
 
@@ -936,21 +942,15 @@ If the repository and conversation disagree:
 
 # 22. Current Immediate Task
 
-**P0 only.**
+**P1 only.**
 
-Start with:
+P0-A and P0-B remain open validation gates. P0-A hardware proof will be performed against the completed APK on the target device. P0-B will be run against the persistent golden PDF benchmark before release acceptance.
 
-### P0-A
+### Current work
 
-Prove Device Owner + Lock Task on real hardware.
+Build the stable Android/backend foundation required to produce a real APK and exercise the deferred P0 validation safely.
 
-Then:
-
-### P0-B
-
-Run the PDF benchmark.
-
-Do not begin P1 until both gates pass.
+Do not silently pull P2+ features into P1.
 
 ---
 
