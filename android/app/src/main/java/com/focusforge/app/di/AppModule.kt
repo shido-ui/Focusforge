@@ -53,5 +53,5 @@ object AppModule {
     @Provides
     @Singleton
     fun api(httpClient: OkHttpClient): FocusForgeApi =
-        FocusForgeApi(BuildConfig.API_BASE_URL, httpClient)
+        FocusForgeApi(BuildConfig.API_BASE_URL, httpClient, BuildConfig.API_REQUIRES_HTTPS)
 }
