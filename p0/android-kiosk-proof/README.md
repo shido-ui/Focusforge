@@ -42,7 +42,7 @@ Exact provisioning requirements vary by Android release and device state. Do not
 | Device model | **OPPO K13 Turbo Pro 5G** |
 | OEM | **OPPO** |
 | ColorOS | **16.0.9** |
-| Android version | TODO — not visible in supplied screenshot |
+| Android version | **16** |
 | Build/security patch | TODO |
 | Provisioning method | TODO |
 | Device Owner | TODO |
