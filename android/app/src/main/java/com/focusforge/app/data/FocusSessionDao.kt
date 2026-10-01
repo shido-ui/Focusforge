@@ -16,6 +16,31 @@ interface FocusSessionDao {
     @Upsert
     suspend fun upsert(session: FocusSessionEntity)
 
+    @Query("""
+        UPDATE focus_sessions
+        SET state=:state,
+            startedAtEpochMs=:startedAtEpochMs,
+            endsAtEpochMs=:endsAtEpochMs,
+            startElapsedRealtimeMs=:startElapsedRealtimeMs,
+            lastElapsedRealtimeMs=:lastElapsedRealtimeMs,
+            elapsedDurationMs=:elapsedDurationMs,
+            updatedAtEpochMs=:updatedAtEpochMs,
+            revision=:newRevision
+        WHERE id=:id AND revision=:expectedRevision
+    """)
+    suspend fun updateIfRevisionMatches(
+        id: String,
+        expectedRevision: Long,
+        newRevision: Long,
+        state: String,
+        startedAtEpochMs: Long?,
+        endsAtEpochMs: Long?,
+        startElapsedRealtimeMs: Long?,
+        lastElapsedRealtimeMs: Long?,
+        elapsedDurationMs: Long,
+        updatedAtEpochMs: Long,
+    ): Int
+
     @Query("DELETE FROM focus_sessions WHERE id=:id")
     suspend fun delete(id: String)
 
