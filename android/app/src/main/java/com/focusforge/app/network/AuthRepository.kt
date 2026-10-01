@@ -45,8 +45,11 @@ class AuthRepository @Inject constructor(
         }
         val session = stored.toAuthSession()
         if (session.accessTokenExpiresAtEpochMs <= System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30)) {
-            runCatching { refreshIfNeeded(session) }
-                .onFailure { clearLocalSession() }
+            try {
+                refreshIfNeeded(session)
+            } catch (_: Exception) {
+                clearLocalSession()
+            }
         } else {
             _state.value = AuthState.SignedIn(session)
         }
