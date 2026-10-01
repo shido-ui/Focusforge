@@ -19,7 +19,7 @@ class FocusForgeApi(
 
     fun health(): Boolean {
         val request = Request.Builder().url("$baseUrl/api/v1/health").get().build()
-        return execute(request).code == 200
+        return execute(request).use { it.code == 200 }
     }
 
     fun signup(
@@ -49,9 +49,10 @@ class FocusForgeApi(
             .delete()
             .header("Authorization", "Bearer $accessToken")
             .build()
-        val response = execute(request)
-        if (response.code != 204) {
-            throw ApiException(response.code, response.body?.string().orEmpty().ifBlank { "Account deletion failed." })
+        execute(request).use { response ->
+            if (response.code != 204) {
+                throw ApiException(response.code, response.body?.string().orEmpty().ifBlank { "Account deletion failed." })
+            }
         }
     }
 
@@ -60,7 +61,7 @@ class FocusForgeApi(
             .url(baseUrl + path)
             .post(body.toString().toRequestBody(jsonMediaType))
             .build()
-        val response = execute(request)
+        execute(request).use { response ->
         val payload = response.body?.string().orEmpty()
         if (response.code !in 200..299) {
             val message = runCatching { JSONObject(payload).optString("detail") }.getOrNull()
@@ -72,6 +73,7 @@ class FocusForgeApi(
             accessToken = json.getString("access_token"),
             tokenType = json.optString("token_type", "bearer"),
         )
+        }
     }
 
     private fun execute(request: Request): okhttp3.Response =
