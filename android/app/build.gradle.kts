@@ -4,6 +4,7 @@ plugins {
  id("org.jetbrains.kotlin.plugin.compose")
  id("org.jetbrains.kotlin.kapt")
  id("com.google.dagger.hilt.android")
+ id("com.google.devtools.ksp")
 }
 android {
  namespace="com.focusforge.app"
@@ -22,8 +23,15 @@ dependencies {
  implementation("androidx.compose.ui:ui")
  implementation("androidx.compose.material3:material3")
  implementation("androidx.compose.ui:ui-tooling-preview")
+ implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
+ implementation("androidx.navigation:navigation-compose:2.9.4")
  implementation("com.google.dagger:hilt-android:2.57.1")
  kapt("com.google.dagger:hilt-compiler:2.57.1")
+ implementation("androidx.room:room-runtime:2.8.3")
+ implementation("androidx.room:room-ktx:2.8.3")
+ ksp("androidx.room:room-compiler:2.8.3")
+ implementation("androidx.datastore:datastore-preferences:1.1.7")
+ implementation("androidx.work:work-runtime-ktx:2.10.5")
  testImplementation("junit:junit:4.13.2")
  debugImplementation("androidx.compose.ui:ui-tooling")
 }
