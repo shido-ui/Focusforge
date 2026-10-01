@@ -1005,3 +1005,19 @@ FEATURE COUNT
 A flashy feature that compromises the reliability of the core study loop does not belong in the current release.
 
 **The current goal remains P0.**
+
+
+## Phase Execution Protocol
+
+Each phase is implemented as a single batched implementation pass before CI debugging begins.
+
+1. Read the phase scope and all relevant existing code.
+2. Implement the complete phase scope in one coherent batch, without stopping after individual sub-items.
+3. Commit the phase implementation to `main`.
+4. Wait for all triggered CI workflows/runs to become available and finish.
+5. Inspect every available job, step, failure log, warning, and build artifact.
+6. Fix all discovered issues in a dedicated debugging pass.
+7. Re-run/verify CI until the phase is technically clean or an external/manual validation dependency remains.
+8. Only after the phase gate is satisfied, begin the next phase.
+
+CI status must never be inferred from an empty status response. A phase is not called green until actual workflow/job evidence is available. Hardware/manual gates remain explicit and cannot be simulated by CI.
