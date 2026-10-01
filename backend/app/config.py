@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     jwt_secret: str
     access_token_minutes: int = 15
     refresh_token_days: int = 30
-    cors_origins: str = ""
+    cors_origins: str = "http://localhost,http://localhost:3000,http://127.0.0.1,http://127.0.0.1:3000"
     max_request_bytes: int = 1_048_576
     max_upload_bytes: int = 52_428_800
     login_rate_limit_per_minute: int = 10
