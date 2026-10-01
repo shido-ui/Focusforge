@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import re
@@ -18,7 +19,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from .config import get_settings
 from .db import get_db
 from .logging import configure_logging, logger
-from .models import AuthSession, SyncEvent, User, utc_now
+from .models import AuthSession, IdempotencyRecord, SyncEvent, User, utc_now
 from .schemas import (
     AccountResponse,
     LoginRequest,
@@ -320,9 +321,28 @@ def delete_account(request: Request, user: User = Depends(get_current_user), db:
 @app.post("/api/v1/sync/events", response_model=SyncEventResponse)
 def sync_event(
     event: SyncEventRequest,
+    request: Request,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    idempotency_key = request.headers.get("Idempotency-Key", "").strip()
+    request_hash = event.model_dump_json().encode("utf-8")
+    request_hash = hashlib.sha256(request_hash).hexdigest()
+
+    if idempotency_key:
+        if len(idempotency_key) > 128 or not re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", idempotency_key):
+            raise HTTPException(400, {"code": "invalid_idempotency_key", "message": "Invalid idempotency key."})
+        existing_key = db.scalar(
+            select(IdempotencyRecord).where(
+                IdempotencyRecord.user_id == user.id,
+                IdempotencyRecord.key == idempotency_key,
+            )
+        )
+        if existing_key is not None:
+            if existing_key.request_hash != request_hash:
+                raise HTTPException(409, {"code": "idempotency_conflict", "message": "Idempotency key was already used for a different request."})
+            return SyncEventResponse.model_validate_json(existing_key.response_body)
+
     existing = db.scalar(
         select(SyncEvent).where(
             SyncEvent.user_id == user.id,
@@ -330,18 +350,51 @@ def sync_event(
         )
     )
     if existing is not None:
-        return SyncEventResponse(client_event_id=event.client_event_id, accepted=True, duplicate=True)
-    record = SyncEvent(
-        user_id=user.id,
-        client_event_id=event.client_event_id,
-        event_type=event.event_type,
-        payload_json=json.dumps(event.payload, separators=(",", ":"), sort_keys=True),
-        client_created_at=event.client_created_at,
-    )
-    db.add(record)
+        response = SyncEventResponse(client_event_id=event.client_event_id, accepted=True, duplicate=True)
+    else:
+        from datetime import timezone
+        client_created_at = event.client_created_at
+        if client_created_at.tzinfo is None:
+            client_created_at = client_created_at.replace(tzinfo=timezone.utc)
+        else:
+            client_created_at = client_created_at.astimezone(timezone.utc)
+        record = SyncEvent(
+            user_id=user.id,
+            client_event_id=event.client_event_id,
+            event_type=event.event_type,
+            payload_json=json.dumps(event.payload, separators=(",", ":"), sort_keys=True),
+            client_created_at=client_created_at,
+        )
+        db.add(record)
+        try:
+            db.flush()
+            response = SyncEventResponse(client_event_id=event.client_event_id, accepted=True, duplicate=False)
+        except IntegrityError:
+            db.rollback()
+            response = SyncEventResponse(client_event_id=event.client_event_id, accepted=True, duplicate=True)
+
+    if idempotency_key:
+        db.add(
+            IdempotencyRecord(
+                user_id=user.id,
+                key=idempotency_key,
+                request_hash=request_hash,
+                status_code=200,
+                response_body=response.model_dump_json(),
+            )
+        )
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
-        return SyncEventResponse(client_event_id=event.client_event_id, accepted=True, duplicate=True)
-    return SyncEventResponse(client_event_id=event.client_event_id, accepted=True, duplicate=False)
+        if idempotency_key:
+            stored = db.scalar(
+                select(IdempotencyRecord).where(
+                    IdempotencyRecord.user_id == user.id,
+                    IdempotencyRecord.key == idempotency_key,
+                )
+            )
+            if stored is not None and stored.request_hash == request_hash:
+                return SyncEventResponse.model_validate_json(stored.response_body)
+        raise HTTPException(409, {"code": "sync_conflict", "message": "Sync event could not be committed safely."})
+    return response
