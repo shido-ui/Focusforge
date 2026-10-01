@@ -1021,3 +1021,21 @@ Each phase is implemented as a single batched implementation pass before CI debu
 8. Only after the phase gate is satisfied, begin the next phase.
 
 CI status must never be inferred from an empty status response. A phase is not called green until actual workflow/job evidence is available. Hardware/manual gates remain explicit and cannot be simulated by CI.
+
+
+## Hardening Addendum — 2026-10-01
+
+A foundation hardening pass has been applied before P2.
+
+Architectural changes requiring downstream validation:
+
+1. Authentication now has access-token + rotating refresh-token semantics.
+2. Android credentials are persisted through an Android Keystore-backed encrypted store.
+3. Backend authentication sessions, sync events, and idempotency records are persisted.
+4. Android Room is version 2 with an explicit 1→2 migration and durable outbox.
+5. FocusSession state is represented by a constrained state machine with revision checks.
+6. WorkManager background ownership moved from Activity startup to Application bootstrap.
+7. Release API endpoint and release signing are fail-closed build inputs.
+8. P0 kiosk proof now persists test state and validates Device Owner/admin state during boot recovery.
+
+These changes are release-blocking until CI, migration tests, and real-device validation are green.
