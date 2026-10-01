@@ -22,6 +22,20 @@ android {
         versionName = "0.1.0"
     }
 
+    signingConfigs {
+        create("release") {
+            val storeFilePath = System.getenv("FOCUSFORGE_RELEASE_KEYSTORE")
+                ?: throw GradleException("FOCUSFORGE_RELEASE_KEYSTORE is required for release signing.")
+            storeFile = file(storeFilePath)
+            storePassword = System.getenv("FOCUSFORGE_RELEASE_STORE_PASSWORD")
+                ?: throw GradleException("FOCUSFORGE_RELEASE_STORE_PASSWORD is required for release signing.")
+            keyAlias = System.getenv("FOCUSFORGE_RELEASE_KEY_ALIAS")
+                ?: throw GradleException("FOCUSFORGE_RELEASE_KEY_ALIAS is required for release signing.")
+            keyPassword = System.getenv("FOCUSFORGE_RELEASE_KEY_PASSWORD")
+                ?: throw GradleException("FOCUSFORGE_RELEASE_KEY_PASSWORD is required for release signing.")
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -34,6 +48,7 @@ android {
             buildConfigField("Boolean", "API_REQUIRES_HTTPS", "false")
         }
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             val endpoint = providers.gradleProperty("focusforgeApiBaseUrlRelease").orNull?.trim()
                 ?: throw GradleException(
